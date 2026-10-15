@@ -1,0 +1,44 @@
+import os
+import platform
+
+# أمثلة لنطاقات ضارة أو إعلانات تريد حجبها
+BLOCKED_DOMAINS = [
+    "malicious-example.com",
+    "tracking-spyware-site.com"
+]
+
+def block_domains():
+    system = platform.system()
+    
+    # تحديد مسار ملف hosts حسب نظام التشغيل
+    if system == "Windows":
+        hosts_path = r"C:\Windows\System32\drivers\etc\hosts"
+    else:  # Linux / macOS
+        hosts_path = "/etc/hosts"
+        
+    print(f"[*] جاري تعديل ملف الـ hosts في: {hosts_path}")
+    
+    try:
+        with open(hosts_path, "r") as file:
+            content = file.read()
+            
+        with open(hosts_path, "a") as file:
+            file.write("\n# --- Blocked by Python Security Script ---\n")
+            for domain in BLOCKED_DOMAINS:
+                # توجيه النطاق إلى الجهاز المحلي (حجبه)
+                entry = f"127.0.0.1 {domain}\n"
+                if domain not in content:
+                    file.write(entry)
+                    print(f"[+] تم حجب النطاق: {domain}")
+                else:
+                    print(f"[-] النطاق محجوب مسبقاً: {domain}")
+                    
+        print("[✔] تمت العملية بنجاح! (قد تحتاج لتشغيل البرنامج بصلاحيات المسؤول Admin/Root).")
+        
+    except PermissionError:
+        [!] خطأ: يجب تشغيل السكريبت بصلاحيات المسؤول (Administrator / Sudo) لتعديل هذا الملف.
+    except Exception as e:
+        print(f"[!] حدث خطأ: {e}")
+
+if __name__ == "__main__":
+    block_domains()
